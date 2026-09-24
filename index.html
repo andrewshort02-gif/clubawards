@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Race Award Calculator</title>
+<meta name="theme-color" content="#0f5c4d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Awards">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+:root{
+  --bg:#eef1ec;--surface:#fff;--ink:#17222b;--muted:#5b6770;--line:#d3d9d2;--field:#f6f8f5;
+  --accent:#0f5c4d;--accent-ink:#fff;--bad:#b3261e;--focus:#1a73e8;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#0f1714;--surface:#18231f;--ink:#e9efeb;--muted:#9aa8a1;--line:#2c3a34;--field:#101a16;--accent:#4fc3a1;--accent-ink:#06231b;--bad:#ff8a80;--focus:#8ab4f8}
+}
+:root[data-theme="dark"]{--bg:#0f1714;--surface:#18231f;--ink:#e9efeb;--muted:#9aa8a1;--line:#2c3a34;--field:#101a16;--accent:#4fc3a1;--accent-ink:#06231b;--bad:#ff8a80;--focus:#8ab4f8}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+main{max-width:560px;margin:0 auto;padding:28px 18px 40px}
+h1{font:700 40px/1 "Avenir Next Condensed","Roboto Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;letter-spacing:.01em;margin:0 0 6px}
+.lede{color:var(--muted);margin:0 0 22px}
+form{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:18px}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend,label.l{display:block;font-weight:600;font-size:15px;margin:0 0 6px;padding:0}
+input,select{font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:11px 12px;width:100%;min-height:46px}
+input:focus-visible,select:focus-visible,.seg input:focus-visible+span{outline:3px solid var(--focus);outline-offset:1px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;margin:0}
+.seg span{display:flex;align-items:center;justify-content:center;min-height:46px;border:1px solid var(--line);border-radius:8px;background:var(--field);font-weight:500}
+.seg input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.time{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.time label{font-size:14px;color:var(--muted)}
+.hint{font-size:14px;color:var(--muted);margin:6px 0 0}
+.err{font-size:14px;color:var(--bad);margin:6px 0 0;min-height:0}
+.err:empty{display:none}
+.bib{position:relative;margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px 22px 22px;overflow:hidden}
+.bib::before{content:"";position:absolute;left:0;top:0;bottom:0;width:12px;background:var(--tier,var(--line))}
+.bib i{position:absolute;top:10px;width:9px;height:9px;border-radius:50%;background:var(--bg);border:1px solid var(--line)}
+.bib i:nth-of-type(1){left:26px}.bib i:nth-of-type(2){right:14px}
+.bib dl{margin:0;padding-left:8px}
+.bib dt{font-size:15px;color:var(--muted);margin-top:14px}
+.bib dt:first-child{margin-top:0}
+.bib dd{margin:0}
+.cat{font-size:20px;font-weight:600}
+.award{font:700 56px/1 "Avenir Next Condensed","Roboto Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;letter-spacing:.01em}
+.atime{font:700 40px/1 "Avenir Next Condensed","Roboto Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums}
+.empty{color:var(--muted)}
+.note{color:var(--muted);font-size:14px;margin:6px 0 0}
+</style>
+</head>
+<body>
+<main>
+  <h1>Race award calculator</h1>
+  <p class="lede">Enter a runner's details to find their age category and award.</p>
+
+  <form id="f" novalidate onsubmit="return false">
+    <fieldset>
+      <legend>Gender</legend>
+      <div class="seg">
+        <label><input type="radio" name="g" value="Male"><span>Male</span></label>
+        <label><input type="radio" name="g" value="Female"><span>Female</span></label>
+      </div>
+    </fieldset>
+
+    <div>
+      <label class="l" for="age">Age on 1 April</label>
+      <input id="age" type="number" inputmode="numeric" min="0" max="120" step="1" placeholder="e.g. 46" aria-describedby="age-e">
+      <p class="hint">Use the runner's age on 1 April, in whole years.</p>
+      <p class="err" id="age-e"></p>
+    </div>
+
+    <div>
+      <label class="l" for="dist">Race distance</label>
+      <select id="dist"><option value="">Choose a distance</option></select>
+    </div>
+
+    <fieldset>
+      <legend>Finish time</legend>
+      <div class="time">
+        <div><label for="h">Hours</label><input id="h" type="number" inputmode="numeric" min="0" max="23" step="1" placeholder="0" aria-describedby="t-e"></div>
+        <div><label for="m">Minutes</label><input id="m" type="number" inputmode="numeric" min="0" max="59" step="1" placeholder="14" aria-describedby="t-e"></div>
+        <div><label for="s">Seconds</label><input id="s" type="number" inputmode="numeric" min="0" max="59" step="1" placeholder="09" aria-describedby="t-e"></div>
+      </div>
+      <p class="err" id="t-e"></p>
+    </fieldset>
+  </form>
+
+  <section class="bib" aria-live="polite" aria-label="Award result">
+    <i></i><i></i>
+    <dl id="out"></dl>
+  </section>
+</main>
+
+<script>
+const D={"awards":["Super Plat","Platinum","Diamond","Gold","Silver","Bronze","Jubilee","3 Star","2 Star","1 Star"],"data":{"Marathon":[[9000,9600,10200,10800,11400,12000,12600,13200,13800,14400,15000],[9600,10200,10800,11400,12000,12600,13200,13800,14400,15000,15600],[10200,10800,11400,12000,12600,13200,13800,14400,15000,15600,16200],[10800,11400,12000,12600,13200,13800,14400,15000,15600,16200,16800],[11400,12000,12600,13200,13800,14400,15000,15600,16200,16800,17400],[12000,12600,13200,13800,14400,15000,15600,16200,16800,17400,18000],[12600,13200,13800,14400,15000,15600,16200,16800,17400,18000,18600],[13200,13800,14400,15000,15600,16200,16800,17400,18000,18600,19200],[13800,14400,15000,15600,16200,16800,17400,18000,18600,19200,19800],[14400,15000,15600,16200,16800,17400,18000,18600,19200,19800,20400]],"Half-marathon":[[4200,4500,4800,5100,5400,5700,6000,6300,6600,6900,7200],[4500,4800,5100,5400,5700,6000,6300,6600,6900,7200,7500],[4800,5100,5400,5700,6000,6300,6600,6900,7200,7500,7800],[5100,5400,5700,6000,6300,6600,6900,7200,7500,7800,8100],[5400,5700,6000,6300,6600,6900,7200,7500,7800,8100,8400],[5700,6000,6300,6600,6900,7200,7500,7800,8100,8400,8700],[6000,6300,6600,6900,7200,7500,7800,8100,8400,8700,9000],[6300,6600,6900,7200,7500,7800,8100,8400,8700,9000,9300],[6600,6900,7200,7500,7800,8100,8400,8700,9000,9300,9600],[6900,7200,7500,7800,8100,8400,8700,9000,9300,9600,9900]],"10 mile":[[3120,3330,3540,3750,3960,4170,4380,4590,4800,5010,5220],[3330,3540,3750,3960,4170,4380,4590,4800,5010,5220,5430],[3540,3750,3960,4170,4380,4590,4800,5010,5220,5430,5640],[3750,3960,4170,4380,4590,4800,5010,5220,5430,5640,5850],[3960,4170,4380,4590,4800,5010,5220,5430,5640,5850,6060],[4170,4380,4590,4800,5010,5220,5430,5640,5850,6060,6270],[4380,4590,4800,5010,5220,5430,5640,5850,6060,6270,6480],[4590,4800,5010,5220,5430,5640,5850,6060,6270,6480,6690],[4800,5010,5220,5430,5640,5850,6060,6270,6480,6690,6900],[5010,5220,5430,5640,5850,6060,6270,6480,6690,6900,7110]],"10k":[[1740,1800,1950,2100,2250,2400,2550,2700,2850,3000,3150],[1800,1950,2100,2250,2400,2550,2700,2850,3000,3150,3300],[1950,2100,2250,2400,2550,2700,2850,3000,3150,3300,3450],[2100,2250,2400,2550,2700,2850,3000,3150,3300,3450,3600],[2250,2400,2550,2700,2850,3000,3150,3300,3450,3600,3750],[2400,2550,2700,2850,3000,3150,3300,3450,3600,3750,3900],[2550,2700,2850,3000,3150,3300,3450,3600,3750,3900,4050],[2700,2850,3000,3150,3300,3450,3600,3750,3900,4050,4200],[2850,3000,3150,3300,3450,3600,3750,3900,4050,4200,4350],[3000,3150,3300,3450,3600,3750,3900,4050,4200,4350,4500]],"5 mile":[[1380,1440,1560,1680,1800,1920,2040,2160,2280,2400,2520],[1440,1560,1680,1800,1920,2040,2160,2280,2400,2520,2640],[1560,1680,1800,1920,2040,2160,2280,2400,2520,2640,2760],[1680,1800,1920,2040,2160,2280,2400,2520,2640,2760,2880],[1800,1920,2040,2160,2280,2400,2520,2640,2760,2880,3000],[1920,2040,2160,2280,2400,2520,2640,2760,2880,3000,3120],[2040,2160,2280,2400,2520,2640,2760,2880,3000,3120,3240],[2160,2280,2400,2520,2640,2760,2880,3000,3120,3240,3360],[2280,2400,2520,2640,2760,2880,3000,3120,3240,3360,3480],[2400,2520,2640,2760,2880,3000,3120,3240,3360,3480,3600]],"5k":[[1005,1035,1070,1110,1155,1205,1260,1320,1380,1445,1515],[1035,1070,1110,1155,1205,1260,1320,1380,1445,1515,1590],[1070,1110,1155,1205,1260,1320,1380,1445,1515,1590,1670],[1110,1155,1205,1260,1320,1380,1445,1515,1590,1670,1755],[1155,1205,1260,1320,1380,1445,1515,1590,1670,1755,1845],[1205,1260,1320,1380,1445,1515,1590,1670,1755,1845,1940],[1260,1320,1380,1445,1515,1590,1670,1755,1845,1940,2030],[1320,1380,1445,1515,1590,1670,1755,1845,1940,2030,2115],[1380,1445,1515,1590,1670,1755,1845,1940,2030,2115,2205],[1445,1515,1590,1670,1755,1845,1940,2030,2115,2205,2295]]},"cats":{"Male":{"br":[0,40,45,50,55,60,65,70,75],"col":0,"n":[["M","Male under 40"],["MV","Male Vet 40-44"],["M2","Male Vet 45-49"],["M3","Male Vet 50-54"],["M4","Male Vet 55-59"],["M5","Male Vet 60-64"],["M6","Male Vet 65-69"],["M7","Male Vet 70-74"],["M8","Male Vet 75+"]]},"Female":{"br":[0,35,40,45,50,55,60,65,70],"col":2,"n":[["F","Female under 35"],["FV","Female Vet 35-39"],["F2","Female Vet 40-44"],["F3","Female Vet 45-49"],["F4","Female Vet 50-54"],["F5","Female Vet 55-59"],["F6","Female Vet 60-64"],["F7","Female Vet 65-69"],["F8","Female Vet 70+"]]}}};
+//LOGIC-START
+function category(g,age){const c=D.cats[g];let i=0;c.br.forEach((b,k)=>{if(age>=b)i=k});return{i,code:c.n[i][0],name:c.n[i][1]}}
+function calc(g,age,dist,t){
+  const cat=category(g,age),col=D.cats[g].col+cat.i,rows=D.data[dist];
+  for(let k=0;k<rows.length;k++){if(t<=rows[k][col])return{cat,idx:k,award:D.awards[k],limit:rows[k][col]}}
+  return{cat,idx:null,award:null,limit:rows[rows.length-1][col]}
+}
+function fmt(s){const p=n=>String(n).padStart(2,"0");return Math.floor(s/3600)+":"+p(Math.floor(s%3600/60))+":"+p(s%60)}
+//LOGIC-END
+
+if(typeof document!=="undefined"){
+const $=id=>document.getElementById(id);
+const TIER=["#5b3fd1","#7c8da6","#2ba6d9","#d9a21b","#9aa3ad","#b0693a","#c43e7a","#1f8a5b","#1f8a5b","#1f8a5b"];
+Object.keys(D.data).forEach(d=>{const o=document.createElement("option");o.value=o.textContent=d;$("dist").appendChild(o)});
+
+function row(dl,label,text,cls){
+  const dt=document.createElement("dt");dt.textContent=label;
+  const dd=document.createElement("dd");dd.textContent=text;if(cls)dd.className=cls;
+  dl.append(dt,dd);
+}
+function render(){
+  const gEl=document.querySelector('input[name="g"]:checked'),g=gEl&&gEl.value;
+  const ageS=$("age").value.trim(),dist=$("dist").value;
+  const hs=$("h").value.trim(),ms=$("m").value.trim(),ss=$("s").value.trim();
+  let age=null,ae="",te="",t=null;
+
+  if(ageS!==""){const a=Number(ageS);if(Number.isInteger(a)&&a>=0&&a<=120)age=a;else ae="Enter age as a whole number of years between 0 and 120."}
+  if(hs!==""||ms!==""||ss!==""){
+    const h=Number(hs||0),m=Number(ms||0),s=Number(ss||0);
+    if(![h,m,s].every(Number.isInteger)||h<0||h>23||m<0||m>59||s<0||s>59)te="Use whole numbers: hours 0–23, minutes and seconds 0–59.";
+    else if(h+m+s===0)te="Enter a finish time greater than zero.";
+    else t=h*3600+m*60+s;
+  }
+  $("age-e").textContent=ae;$("t-e").textContent=te;
+
+  const dl=$("out");dl.replaceChildren();
+  const bib=dl.parentElement;bib.style.removeProperty("--tier");
+  const missing=[];
+  if(!g)missing.push("gender");if(age===null&&!ae)missing.push("age");if(!dist)missing.push("race distance");if(t===null&&!te)missing.push("finish time");
+  const ready=g&&age!==null&&dist&&t!==null;
+
+  if(g&&age!==null){row(dl,"Age category",category(g,age).name+" ("+category(g,age).code+")","cat")}
+  if(!ready){
+    const msg=missing.length?"Add "+missing.join(", ").replace(/, ([^,]*)$/,(x,y)=>" and "+y)+" to see the award.":"Fix the highlighted fields to see the award.";
+    const p=document.createElement("dd");p.className="empty";p.textContent=msg;
+    const dt=document.createElement("dt");dt.textContent="Award given";dl.append(dt,p);return;
+  }
+  const r=calc(g,age,dist,t);
+  if(r.award){
+    bib.style.setProperty("--tier",TIER[r.idx]);
+    row(dl,"Award given",r.award,"award");
+    row(dl,"Award time",fmt(r.limit),"atime");
+    const n=document.createElement("p");n.className="note";n.textContent="The slowest time that earns this award in "+r.cat.name+" over "+dist+".";dl.append(n);
+  }else{
+    row(dl,"Award given","No award","award");
+    const n=document.createElement("p");n.className="note";n.textContent="This time is slower than the 1 Star standard of "+fmt(r.limit)+" for "+r.cat.name+" over "+dist+".";dl.append(n);
+  }
+}
+document.getElementById("f").addEventListener("input",render);
+document.getElementById("f").addEventListener("change",render);
+render();
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+</script>
+</body>
+</html>

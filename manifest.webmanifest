@@ -1,7 +1,7 @@
 {
   "name": "Race Award Calculator",
   "short_name": "Awards",
-  "description": "Find a runner's age category and award from gender, age, distance and finish time.",
+  "description": "See the time needed for every award by gender, age and distance, or check which award a finish time earns.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

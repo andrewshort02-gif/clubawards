@@ -53,13 +53,33 @@ input:focus-visible,select:focus-visible,.seg input:focus-visible+span{outline:3
 .award{font:700 56px/1 "Avenir Next Condensed","Roboto Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;letter-spacing:.01em}
 .atime{font:700 40px/1 "Avenir Next Condensed","Roboto Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums}
 .empty{color:var(--muted)}
+.std{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.std h2{font:700 30px/1.1 "Avenir Next Condensed","Roboto Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;margin:0 0 4px}
+.std .sub{color:var(--muted);margin:0 0 12px;font-size:15px}
+.std table{width:100%;border-collapse:collapse}
+.std th{text-align:left;font-size:14px;font-weight:600;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line)}
+.std td{padding:10px 8px;border-bottom:1px solid var(--line)}
+.std tbody tr:last-child td{border-bottom:0}
+.std th:last-child,.std td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.std .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:10px;vertical-align:-1px}
+.std tr.hit td{background:var(--field);font-weight:600}
+.std tr.hit td:first-child{box-shadow:inset 4px 0 0 var(--tier)}
+.std .tag{margin-left:8px;font-size:13px;font-weight:500;color:var(--muted)}
 .note{color:var(--muted);font-size:14px;margin:6px 0 0}
+.calc{margin:12px 0 0;font-weight:600;font-size:19px}
+.ver{margin-top:28px;color:var(--muted);font-size:15px}
+.ver summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+.ver summary:focus-visible{outline:3px solid var(--focus);outline-offset:1px;border-radius:4px}
+.ver ol{list-style:none;margin:4px 0 0;padding:0}
+.ver li{padding:12px 0;border-top:1px solid var(--line)}
+.ver b{color:var(--ink);font-weight:600}
+.ver time{margin-left:6px}
 </style>
 </head>
 <body>
 <main>
   <h1>Race award calculator</h1>
-  <p class="lede">Enter a runner's details to find their age category and award.</p>
+  <p class="lede">Enter gender, date of birth and race distance to see the time needed for every award. Add a finish time to find out which award it earns.</p>
 
   <form id="f" novalidate onsubmit="return false">
     <fieldset>
@@ -70,12 +90,17 @@ input:focus-visible,select:focus-visible,.seg input:focus-visible+span{outline:3
       </div>
     </fieldset>
 
-    <div>
-      <label class="l" for="age">Age on 1 April</label>
-      <input id="age" type="number" inputmode="numeric" min="0" max="120" step="1" placeholder="e.g. 46" aria-describedby="age-e">
-      <p class="hint">Use the runner's age on 1 April, in whole years.</p>
+    <fieldset>
+      <legend>Date of birth</legend>
+      <div class="time">
+        <div><label for="dd">Day</label><input id="dd" type="number" inputmode="numeric" min="1" max="31" step="1" placeholder="12" aria-describedby="age-e"></div>
+        <div><label for="mo">Month</label><input id="mo" type="number" inputmode="numeric" min="1" max="12" step="1" placeholder="3" aria-describedby="age-e"></div>
+        <div><label for="yy">Year</label><input id="yy" type="number" inputmode="numeric" min="1900" step="1" placeholder="1979" aria-describedby="age-e"></div>
+      </div>
+      <p class="calc" id="club-age" aria-live="polite" hidden></p>
+      <p class="hint" id="age-h"></p>
       <p class="err" id="age-e"></p>
-    </div>
+    </fieldset>
 
     <div>
       <label class="l" for="dist">Race distance</label>
@@ -83,25 +108,45 @@ input:focus-visible,select:focus-visible,.seg input:focus-visible+span{outline:3
     </div>
 
     <fieldset>
-      <legend>Finish time</legend>
+      <legend>Finish time (optional)</legend>
       <div class="time">
         <div><label for="h">Hours</label><input id="h" type="number" inputmode="numeric" min="0" max="23" step="1" placeholder="0" aria-describedby="t-e"></div>
         <div><label for="m">Minutes</label><input id="m" type="number" inputmode="numeric" min="0" max="59" step="1" placeholder="14" aria-describedby="t-e"></div>
         <div><label for="s">Seconds</label><input id="s" type="number" inputmode="numeric" min="0" max="59" step="1" placeholder="09" aria-describedby="t-e"></div>
       </div>
+      <p class="hint">Leave this blank to just see the award times.</p>
       <p class="err" id="t-e"></p>
     </fieldset>
   </form>
 
-  <section class="bib" aria-live="polite" aria-label="Award result">
+  <section class="bib" id="bib" aria-live="polite" aria-label="Award result" hidden>
     <i></i><i></i>
     <dl id="out"></dl>
   </section>
+
+  <section class="std" id="std" aria-live="polite"></section>
+
+  <details class="ver">
+    <summary>Version 1.6 &middot; Version history</summary>
+    <ol>
+      <li><b>1.6</b><time datetime="2026-09-24">24 Sep 2026</time><br>Club age can no longer be typed in directly: it is always worked out from the date of birth.</li>
+            <li><b>1.5</b><time datetime="2026-09-24">24 Sep 2026</time><br>Club age is now worked out from date of birth, as the age on 1 April at the start of the club year. The club year (1 April to 31 March) rolls over automatically each 1 April. Club age can still be entered directly.</li>
+            <li><b>1.4</b><time datetime="2026-09-24">24 Sep 2026</time><br>Added this version history.</li>
+      <li><b>1.3</b><time datetime="2026-09-24">24 Sep 2026</time><br>The award result now appears above the list of award times.</li>
+      <li><b>1.2</b><time datetime="2026-09-24">24 Sep 2026</time><br>Added the award times list: enter gender, age and distance to see the time needed for every award. Finish time is now optional.</li>
+      <li><b>1.1</b><time datetime="2026-09-24">24 Sep 2026</time><br>Made the app standalone: works offline, can be installed, and no longer loads anything from the internet.</li>
+      <li><b>1.0</b><time datetime="2026-09-24">24 Sep 2026</time><br>First version, built from the Excel award calculator: age category, award and award time from gender, age, distance and finish time.</li>
+    </ol>
+  </details>
 </main>
 
 <script>
 const D={"awards":["Super Plat","Platinum","Diamond","Gold","Silver","Bronze","Jubilee","3 Star","2 Star","1 Star"],"data":{"Marathon":[[9000,9600,10200,10800,11400,12000,12600,13200,13800,14400,15000],[9600,10200,10800,11400,12000,12600,13200,13800,14400,15000,15600],[10200,10800,11400,12000,12600,13200,13800,14400,15000,15600,16200],[10800,11400,12000,12600,13200,13800,14400,15000,15600,16200,16800],[11400,12000,12600,13200,13800,14400,15000,15600,16200,16800,17400],[12000,12600,13200,13800,14400,15000,15600,16200,16800,17400,18000],[12600,13200,13800,14400,15000,15600,16200,16800,17400,18000,18600],[13200,13800,14400,15000,15600,16200,16800,17400,18000,18600,19200],[13800,14400,15000,15600,16200,16800,17400,18000,18600,19200,19800],[14400,15000,15600,16200,16800,17400,18000,18600,19200,19800,20400]],"Half-marathon":[[4200,4500,4800,5100,5400,5700,6000,6300,6600,6900,7200],[4500,4800,5100,5400,5700,6000,6300,6600,6900,7200,7500],[4800,5100,5400,5700,6000,6300,6600,6900,7200,7500,7800],[5100,5400,5700,6000,6300,6600,6900,7200,7500,7800,8100],[5400,5700,6000,6300,6600,6900,7200,7500,7800,8100,8400],[5700,6000,6300,6600,6900,7200,7500,7800,8100,8400,8700],[6000,6300,6600,6900,7200,7500,7800,8100,8400,8700,9000],[6300,6600,6900,7200,7500,7800,8100,8400,8700,9000,9300],[6600,6900,7200,7500,7800,8100,8400,8700,9000,9300,9600],[6900,7200,7500,7800,8100,8400,8700,9000,9300,9600,9900]],"10 mile":[[3120,3330,3540,3750,3960,4170,4380,4590,4800,5010,5220],[3330,3540,3750,3960,4170,4380,4590,4800,5010,5220,5430],[3540,3750,3960,4170,4380,4590,4800,5010,5220,5430,5640],[3750,3960,4170,4380,4590,4800,5010,5220,5430,5640,5850],[3960,4170,4380,4590,4800,5010,5220,5430,5640,5850,6060],[4170,4380,4590,4800,5010,5220,5430,5640,5850,6060,6270],[4380,4590,4800,5010,5220,5430,5640,5850,6060,6270,6480],[4590,4800,5010,5220,5430,5640,5850,6060,6270,6480,6690],[4800,5010,5220,5430,5640,5850,6060,6270,6480,6690,6900],[5010,5220,5430,5640,5850,6060,6270,6480,6690,6900,7110]],"10k":[[1740,1800,1950,2100,2250,2400,2550,2700,2850,3000,3150],[1800,1950,2100,2250,2400,2550,2700,2850,3000,3150,3300],[1950,2100,2250,2400,2550,2700,2850,3000,3150,3300,3450],[2100,2250,2400,2550,2700,2850,3000,3150,3300,3450,3600],[2250,2400,2550,2700,2850,3000,3150,3300,3450,3600,3750],[2400,2550,2700,2850,3000,3150,3300,3450,3600,3750,3900],[2550,2700,2850,3000,3150,3300,3450,3600,3750,3900,4050],[2700,2850,3000,3150,3300,3450,3600,3750,3900,4050,4200],[2850,3000,3150,3300,3450,3600,3750,3900,4050,4200,4350],[3000,3150,3300,3450,3600,3750,3900,4050,4200,4350,4500]],"5 mile":[[1380,1440,1560,1680,1800,1920,2040,2160,2280,2400,2520],[1440,1560,1680,1800,1920,2040,2160,2280,2400,2520,2640],[1560,1680,1800,1920,2040,2160,2280,2400,2520,2640,2760],[1680,1800,1920,2040,2160,2280,2400,2520,2640,2760,2880],[1800,1920,2040,2160,2280,2400,2520,2640,2760,2880,3000],[1920,2040,2160,2280,2400,2520,2640,2760,2880,3000,3120],[2040,2160,2280,2400,2520,2640,2760,2880,3000,3120,3240],[2160,2280,2400,2520,2640,2760,2880,3000,3120,3240,3360],[2280,2400,2520,2640,2760,2880,3000,3120,3240,3360,3480],[2400,2520,2640,2760,2880,3000,3120,3240,3360,3480,3600]],"5k":[[1005,1035,1070,1110,1155,1205,1260,1320,1380,1445,1515],[1035,1070,1110,1155,1205,1260,1320,1380,1445,1515,1590],[1070,1110,1155,1205,1260,1320,1380,1445,1515,1590,1670],[1110,1155,1205,1260,1320,1380,1445,1515,1590,1670,1755],[1155,1205,1260,1320,1380,1445,1515,1590,1670,1755,1845],[1205,1260,1320,1380,1445,1515,1590,1670,1755,1845,1940],[1260,1320,1380,1445,1515,1590,1670,1755,1845,1940,2030],[1320,1380,1445,1515,1590,1670,1755,1845,1940,2030,2115],[1380,1445,1515,1590,1670,1755,1845,1940,2030,2115,2205],[1445,1515,1590,1670,1755,1845,1940,2030,2115,2205,2295]]},"cats":{"Male":{"br":[0,40,45,50,55,60,65,70,75],"col":0,"n":[["M","Male under 40"],["MV","Male Vet 40-44"],["M2","Male Vet 45-49"],["M3","Male Vet 50-54"],["M4","Male Vet 55-59"],["M5","Male Vet 60-64"],["M6","Male Vet 65-69"],["M7","Male Vet 70-74"],["M8","Male Vet 75+"]]},"Female":{"br":[0,35,40,45,50,55,60,65,70],"col":2,"n":[["F","Female under 35"],["FV","Female Vet 35-39"],["F2","Female Vet 40-44"],["F3","Female Vet 45-49"],["F4","Female Vet 50-54"],["F5","Female Vet 55-59"],["F6","Female Vet 60-64"],["F7","Female Vet 65-69"],["F8","Female Vet 70+"]]}}};
 //LOGIC-START
+const CLUB_YEAR_START={month:4,day:1}; // club year begins 1 April and ends 31 March; edit here only if that ever changes
+function clubYear(today){const m=today.getMonth()+1,y=today.getFullYear();return(m>CLUB_YEAR_START.month||(m===CLUB_YEAR_START.month&&today.getDate()>=CLUB_YEAR_START.day))?y:y-1}
+function validDate(d,m,y){const t=new Date(y,m-1,d);return t.getFullYear()===y&&t.getMonth()===m-1&&t.getDate()===d}
+function clubAge(d,m,y,cy){const had=m<CLUB_YEAR_START.month||(m===CLUB_YEAR_START.month&&d<=CLUB_YEAR_START.day);return cy-y-(had?0:1)}
 function category(g,age){const c=D.cats[g];let i=0;c.br.forEach((b,k)=>{if(age>=b)i=k});return{i,code:c.n[i][0],name:c.n[i][1]}}
 function calc(g,age,dist,t){
   const cat=category(g,age),col=D.cats[g].col+cat.i,rows=D.data[dist];
@@ -123,11 +168,18 @@ function row(dl,label,text,cls){
 }
 function render(){
   const gEl=document.querySelector('input[name="g"]:checked'),g=gEl&&gEl.value;
-  const ageS=$("age").value.trim(),dist=$("dist").value;
+  const dist=$("dist").value;
   const hs=$("h").value.trim(),ms=$("m").value.trim(),ss=$("s").value.trim();
   let age=null,ae="",te="",t=null;
 
-  if(ageS!==""){const a=Number(ageS);if(Number.isInteger(a)&&a>=0&&a<=120)age=a;else ae="Enter age as a whole number of years between 0 and 120."}
+  const now=new Date(),cy=clubYear(now);
+  const P=[$("dd").value.trim(),$("mo").value.trim(),$("yy").value.trim()];
+  if(P.every(x=>x!=="")){
+    const d0=Number(P[0]),m0=Number(P[1]),y0=Number(P[2]);
+    if(![d0,m0,y0].every(Number.isInteger)||y0<1900||!validDate(d0,m0,y0))ae="Enter a real date of birth: day, month and a four-digit year.";
+    else if(new Date(y0,m0-1,d0)>now)ae="Date of birth is in the future.";
+    else{const a=clubAge(d0,m0,y0,cy);if(a<0)ae="Date of birth is after the start of the club year (1 April "+cy+"), so there is no club age yet.";else if(a>120)ae="Check the year of birth: that gives a club age over 120.";else age=a}
+  }
   if(hs!==""||ms!==""||ss!==""){
     const h=Number(hs||0),m=Number(ms||0),s=Number(ss||0);
     if(![h,m,s].every(Number.isInteger)||h<0||h>23||m<0||m>59||s<0||s>59)te="Use whole numbers: hours 0–23, minutes and seconds 0–59.";
@@ -135,28 +187,46 @@ function render(){
     else t=h*3600+m*60+s;
   }
   $("age-e").textContent=ae;$("t-e").textContent=te;
+  $("age-h").textContent="Club age is the age on 1 April "+cy+". Current club year: "+cy+"/"+String((cy+1)%100).padStart(2,"0")+" (1 April "+cy+" to 31 March "+(cy+1)+").";
+  const ca=$("club-age");ca.hidden=age===null;if(!ca.hidden)ca.textContent="Club age: "+age;
 
-  const dl=$("out");dl.replaceChildren();
-  const bib=dl.parentElement;bib.style.removeProperty("--tier");
-  const missing=[];
-  if(!g)missing.push("gender");if(age===null&&!ae)missing.push("age");if(!dist)missing.push("race distance");if(t===null&&!te)missing.push("finish time");
-  const ready=g&&age!==null&&dist&&t!==null;
-
-  if(g&&age!==null){row(dl,"Age category",category(g,age).name+" ("+category(g,age).code+")","cat")}
-  if(!ready){
-    const msg=missing.length?"Add "+missing.join(", ").replace(/, ([^,]*)$/,(x,y)=>" and "+y)+" to see the award.":"Fix the highlighted fields to see the award.";
-    const p=document.createElement("dd");p.className="empty";p.textContent=msg;
-    const dt=document.createElement("dt");dt.textContent="Award given";dl.append(dt,p);return;
+  const std=$("std"),bib=$("bib"),dl=$("out");
+  std.replaceChildren();dl.replaceChildren();bib.style.removeProperty("--tier");bib.hidden=true;
+  if(!(g&&age!==null&&dist)){
+    const missing=[];
+    if(!g)missing.push("gender");if(age===null&&!ae)missing.push("date of birth");if(!dist)missing.push("race distance");
+    const p=document.createElement("p");p.className="empty";
+    p.textContent=missing.length?"Add "+missing.join(", ").replace(/, ([^,]*)$/," and $1")+" to see the award times.":"Fix the date of birth above to see the award times.";
+    std.append(p);return;
   }
-  const r=calc(g,age,dist,t);
+  const cat=category(g,age),rows=D.data[dist],col=D.cats[g].col+cat.i;
+  const r=t!==null?calc(g,age,dist,t):null;
+  const h2=document.createElement("h2");h2.textContent="Award times";
+  const sub=document.createElement("p");sub.className="sub";
+  sub.textContent=cat.name+" ("+cat.code+"), "+dist+". Finish in the time shown or faster to earn the award.";
+  const tb=document.createElement("table"),thead=document.createElement("thead"),hr=document.createElement("tr"),body=document.createElement("tbody");
+  ["Award","Required time"].forEach(x=>{const th=document.createElement("th");th.scope="col";th.textContent=x;hr.append(th)});
+  thead.append(hr);
+  D.awards.forEach((name,k)=>{
+    const tr=document.createElement("tr"),a=document.createElement("td"),b=document.createElement("td");
+    tr.style.setProperty("--tier",TIER[k]);
+    const dot=document.createElement("span");dot.className="dot";dot.style.background=TIER[k];dot.setAttribute("aria-hidden","true");
+    a.append(dot,name);b.textContent=fmt(rows[k][col]);
+    if(r&&r.idx===k){tr.className="hit";const tag=document.createElement("span");tag.className="tag";tag.textContent="Your award";a.append(tag)}
+    tr.append(a,b);body.append(tr);
+  });
+  tb.append(thead,body);std.append(h2,sub,tb);
+  if(!r)return;
+  bib.hidden=false;
+  row(dl,"Age category",cat.name+" ("+cat.code+")","cat");
   if(r.award){
     bib.style.setProperty("--tier",TIER[r.idx]);
     row(dl,"Award given",r.award,"award");
     row(dl,"Award time",fmt(r.limit),"atime");
-    const n=document.createElement("p");n.className="note";n.textContent="The slowest time that earns this award in "+r.cat.name+" over "+dist+".";dl.append(n);
+    const n=document.createElement("p");n.className="note";n.textContent="The slowest time that earns this award in "+cat.name+" over "+dist+".";dl.append(n);
   }else{
     row(dl,"Award given","No award","award");
-    const n=document.createElement("p");n.className="note";n.textContent="This time is slower than the 1 Star standard of "+fmt(r.limit)+" for "+r.cat.name+" over "+dist+".";dl.append(n);
+    const n=document.createElement("p");n.className="note";n.textContent="This time is slower than the 1 Star standard of "+fmt(r.limit)+" for "+cat.name+" over "+dist+".";dl.append(n);
   }
 }
 document.getElementById("f").addEventListener("input",render);

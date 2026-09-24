@@ -1,7 +1,9 @@
 This app is for the use of Eye Community Runners (ECR) to calculate if they are eligible to claim a club award for a race they have run. It uses the club award tables that are specific to ECR.
 
-A member needs to enter their age as at the start of the club year (1st April), select their gender and the race distance run, enter their official finish time, the app will then calculate and display the award to be claimed and the qualifying time required to acheive that award.
+A member needs to select their gender and the race distance run, enter their official finish time and their date of birth, the app will then calculate and display the award to be claimed and the qualifying time required to acheive that award.
 
 If the time ran does not meet the time required for any award at the input distance/age combination, the app tells the member this.
+
+App will also now display qalifying times for each award at the selected age/distance.
 
 NB: It is still upto the member to make the award claim using the form on the ECR site. Neither does the app manage previous claims.

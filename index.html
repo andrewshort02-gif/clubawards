@@ -74,12 +74,18 @@ input:focus-visible,select:focus-visible,.seg input:focus-visible+span{outline:3
 .ver li{padding:12px 0;border-top:1px solid var(--line)}
 .ver b{color:var(--ink);font-weight:600}
 .ver time{margin-left:6px}
+.gform{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.warn{display:flex;gap:10px;align-items:flex-start;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--ink);margin:0 0 14px}
+.warn b{display:block;margin-bottom:2px}
+.btn{display:flex;align-items:center;justify-content:center;min-height:48px;background:var(--accent);color:var(--accent-ink);font-weight:600;border-radius:8px;text-decoration:none}
+.btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.gform .hint{margin-top:10px;text-align:center}
 </style>
 </head>
 <body>
 <main>
   <h1>Race award calculator</h1>
-  <p class="lede">Enter gender, date of birth and race distance to see the time needed for every award. Add a finish time to find out which award it earns.</p>
+  <p class="lede">Enter gender, date of birth and race distance to see the time needed for every award. Add a race name and date to base club age on that race's club year. Add a finish time to find out which award it earns.</p>
 
   <form id="f" novalidate onsubmit="return false">
     <fieldset>
@@ -108,6 +114,20 @@ input:focus-visible,select:focus-visible,.seg input:focus-visible+span{outline:3
     </div>
 
     <fieldset>
+      <legend>Race (optional)</legend>
+      <label class="l" for="rname">Race name</label>
+      <input id="rname" type="text" placeholder="e.g. Spring 10k" autocomplete="off">
+      <p class="hint" style="margin-top:14px">Race date</p>
+      <div class="time">
+        <div><label for="rd">Day</label><input id="rd" type="number" inputmode="numeric" min="1" max="31" step="1" placeholder="28" aria-describedby="rd-e"></div>
+        <div><label for="rm">Month</label><input id="rm" type="number" inputmode="numeric" min="1" max="12" step="1" placeholder="3" aria-describedby="rd-e"></div>
+        <div><label for="ry">Year</label><input id="ry" type="number" inputmode="numeric" min="1900" step="1" placeholder="2027" aria-describedby="rd-e"></div>
+      </div>
+      <p class="hint" id="rd-h"></p>
+      <p class="err" id="rd-e"></p>
+    </fieldset>
+
+    <fieldset>
       <legend>Finish time (optional)</legend>
       <div class="time">
         <div><label for="h">Hours</label><input id="h" type="number" inputmode="numeric" min="0" max="23" step="1" placeholder="0" aria-describedby="t-e"></div>
@@ -117,6 +137,15 @@ input:focus-visible,select:focus-visible,.seg input:focus-visible+span{outline:3
       <p class="hint">Leave this blank to just see the award times.</p>
       <p class="err" id="t-e"></p>
     </fieldset>
+
+    <fieldset>
+      <legend>Your details for the claim form (optional)</legend>
+      <div style="display:grid;gap:12px">
+        <div><label class="l" for="fname">First name</label><input id="fname" type="text" autocomplete="given-name" aria-describedby="fname-e"><p class="err" id="fname-e"></p></div>
+        <div><label class="l" for="lname">Last name</label><input id="lname" type="text" autocomplete="family-name" aria-describedby="lname-e"><p class="err" id="lname-e"></p></div>
+        <div><label class="l" for="uemail">Email address</label><input id="uemail" type="email" autocomplete="email" aria-describedby="uemail-e"><p class="err" id="uemail-e"></p></div>
+      </div>
+    </fieldset>
   </form>
 
   <section class="bib" id="bib" aria-live="polite" aria-label="Award result" hidden>
@@ -124,12 +153,22 @@ input:focus-visible,select:focus-visible,.seg input:focus-visible+span{outline:3
     <dl id="out"></dl>
   </section>
 
+  <section class="gform" id="gform" hidden>
+    <div class="warn"><span aria-hidden="true">⚠️</span><span><b>This does not submit your claim.</b> It only fills in the club's form with the details above. Check everything the form shows, add anything it still needs, then press Submit yourself in the form.</span></div>
+    <a id="gform-btn" class="btn" href="#" target="_blank" rel="noopener">Fill in the club's claim form</a>
+  </section>
+
   <section class="std" id="std" aria-live="polite"></section>
 
   <details class="ver">
-    <summary>Version 1.6 &middot; Version history</summary>
+    <summary>Version 2.0 &middot; Version history</summary>
     <ol>
-      <li><b>1.6</b><time datetime="2026-09-24">24 Sep 2026</time><br>Club age can no longer be typed in directly: it is always worked out from the date of birth.</li>
+      <li><b>2.0</b><time datetime="2026-10-14">14 Oct 2026</time><br>Version number raised to 2.0.</li>
+      <li><b>1.10</b><time datetime="2026-10-14">14 Oct 2026</time><br>The claim form button now checks that first name, last name and a valid email address have been entered before it opens the form, and asks for anything missing instead.</li>
+      <li><b>1.9</b><time datetime="2026-10-14">14 Oct 2026</time><br>Added a button that opens the club's Google Form with the race, category, award and your details already filled in, once an award has been earned. This is always the user's choice to open, and it only fills the form in — it never submits it. Also added optional first name, last name and email fields for the form.</li>
+      <li><b>1.8</b><time datetime="2026-09-24">24 Sep 2026</time><br>The race date can no longer be set later than today.</li>
+            <li><b>1.7</b><time datetime="2026-09-24">24 Sep 2026</time><br>Added optional race name and race date. When a race date is entered, club age is worked out from the club year that date falls in, rather than today's club year — so entries for a race near the end of March can be processed after 1 April without changing the runner's club age. Both fields are optional and the award times list still works without them.</li>
+            <li><b>1.6</b><time datetime="2026-09-24">24 Sep 2026</time><br>Club age can no longer be typed in directly: it is always worked out from the date of birth.</li>
             <li><b>1.5</b><time datetime="2026-09-24">24 Sep 2026</time><br>Club age is now worked out from date of birth, as the age on 1 April at the start of the club year. The club year (1 April to 31 March) rolls over automatically each 1 April. Club age can still be entered directly.</li>
             <li><b>1.4</b><time datetime="2026-09-24">24 Sep 2026</time><br>Added this version history.</li>
       <li><b>1.3</b><time datetime="2026-09-24">24 Sep 2026</time><br>The award result now appears above the list of award times.</li>
@@ -154,6 +193,41 @@ function calc(g,age,dist,t){
   return{cat,idx:null,award:null,limit:rows[rows.length-1][col]}
 }
 function fmt(s){const p=n=>String(n).padStart(2,"0");return Math.floor(s/3600)+":"+p(Math.floor(s%3600/60))+":"+p(s%60)}
+
+// Club's Google Form pre-fill: field IDs read from the form's own pre-filled link, not guessed.
+const FORM_BASE="https://docs.google.com/forms/d/e/1FAIpQLSenzlXyto-OR_W_8dKXI0Mcg7p6KebDBb9HvA9nRrcW7QMNmw/viewform";
+const ENTRY={distance:596119354,event:276870192,raceDate:1633099806,dob:545777854,age:1019293821,
+  finish:105762265,award:139393205,awardTime:1502547065,category:351410485,first:790704155,last:1920109540,email:300540545};
+const DIST_MAP={"Marathon":"Marathon","Half-marathon":"Half Marathon","10 mile":"Ten Miles","10k":"Ten Kilometers","5 mile":"Five Miles","5k":"Five Kilometers"};
+const AWARD_MAP={"Super Plat":"Super Platinum"};
+const CAT_MAP={M:"M - Male u40",MV:"MV - Male Vet - 40 / 44",M2:"M2 - Male - 45 / 49",M3:"M3 - Male - 50 / 54",M4:"M4 - Male - 55 / 59",M5:"M5 - Male - 60 / 64",M6:"M6 - Male - 65 / 69",M7:"M7 - Male - 70 / 74",M8:"M8 - Male - 75+",
+  F:"F - Female u35",FV:"FV - Female Vet - 35 / 39",F2:"FV2 - Female - 40 / 44",F3:"FV3 - Female - 45 / 49",F4:"FV4 - Female - 50 / 54",F5:"FV5 - Female - 55 / 59",F6:"FV6 - Female - 60 / 64",F7:"FV7 - Female - 65 / 69",F8:"FV8 - Female - 70+"};
+function timeParts(sec){return{h:Math.floor(sec/3600),m:Math.floor(sec%3600/60),s:sec%60}}
+function buildFormUrl(f){
+  const p=new URLSearchParams();p.set("usp","pp_url");
+  if(f.dist&&DIST_MAP[f.dist])p.set("entry."+ENTRY.distance,DIST_MAP[f.dist]);
+  if(f.rname)p.set("entry."+ENTRY.event,f.rname);
+  if(f.raceDate){p.set("entry."+ENTRY.raceDate+"_month",f.raceDate.getMonth()+1);p.set("entry."+ENTRY.raceDate+"_day",f.raceDate.getDate());p.set("entry."+ENTRY.raceDate+"_year",f.raceDate.getFullYear())}
+  if(f.dob){p.set("entry."+ENTRY.dob+"_month",f.dob.m);p.set("entry."+ENTRY.dob+"_day",f.dob.d);p.set("entry."+ENTRY.dob+"_year",f.dob.y)}
+  if(f.age!=null)p.set("entry."+ENTRY.age,f.age);
+  if(f.finishSec!=null){const t=timeParts(f.finishSec);p.set("entry."+ENTRY.finish+"_hour",t.h);p.set("entry."+ENTRY.finish+"_minute",t.m);p.set("entry."+ENTRY.finish+"_second",t.s)}
+  if(f.award)p.set("entry."+ENTRY.award,AWARD_MAP[f.award]||f.award);
+  if(f.limitSec!=null){const t=timeParts(f.limitSec);p.set("entry."+ENTRY.awardTime+"_hour",t.h);p.set("entry."+ENTRY.awardTime+"_minute",t.m);p.set("entry."+ENTRY.awardTime+"_second",t.s)}
+  if(f.catCode&&CAT_MAP[f.catCode])p.set("entry."+ENTRY.category,CAT_MAP[f.catCode]);
+  if(f.first)p.set("entry."+ENTRY.first,f.first);
+  if(f.last)p.set("entry."+ENTRY.last,f.last);
+  if(f.email)p.set("entry."+ENTRY.email,f.email);
+  return FORM_BASE+"?"+p.toString();
+}
+const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function validateClaimDetails(first,last,email){
+  const errs={};
+  if(!first.trim())errs.first="Enter the first name to go on the claim.";
+  if(!last.trim())errs.last="Enter the last name to go on the claim.";
+  if(!email.trim())errs.email="Enter an email address for the claim.";
+  else if(!EMAIL_RE.test(email.trim()))errs.email="Enter a valid email address.";
+  return errs;
+}
 //LOGIC-END
 
 if(typeof document!=="undefined"){
@@ -170,15 +244,26 @@ function render(){
   const gEl=document.querySelector('input[name="g"]:checked'),g=gEl&&gEl.value;
   const dist=$("dist").value;
   const hs=$("h").value.trim(),ms=$("m").value.trim(),ss=$("s").value.trim();
-  let age=null,ae="",te="",t=null;
+  let age=null,ae="",te="",t=null,dobObj=null;
 
-  const now=new Date(),cy=clubYear(now);
+  const now=new Date();
+  const R=[$("rd").value.trim(),$("rm").value.trim(),$("ry").value.trim()];
+  let raceDate=null,re="";
+  if(R.some(x=>x!=="")&&!R.every(x=>x!=="")){re="Enter a complete race date: day, month and year, or leave all three blank."}
+  else if(R.every(x=>x!=="")){
+    const d1=Number(R[0]),m1=Number(R[1]),y1=Number(R[2]);
+    if(![d1,m1,y1].every(Number.isInteger)||y1<1900||!validDate(d1,m1,y1))re="Enter a real race date: day, month and a four-digit year.";
+    else{const rd0=new Date(y1,m1-1,d1);if(rd0>now)re="Race date cannot be later than today.";else raceDate=rd0;}
+  }
+  $("rd-e").textContent=re;
+  const cy=clubYear(raceDate||now);
+  $("rd-h").textContent=raceDate?"Club year for this race: "+cy+"/"+String((cy+1)%100).padStart(2,"0")+".":"No race date entered — using today's club year, "+cy+"/"+String((cy+1)%100).padStart(2,"0")+".";
   const P=[$("dd").value.trim(),$("mo").value.trim(),$("yy").value.trim()];
   if(P.every(x=>x!=="")){
     const d0=Number(P[0]),m0=Number(P[1]),y0=Number(P[2]);
     if(![d0,m0,y0].every(Number.isInteger)||y0<1900||!validDate(d0,m0,y0))ae="Enter a real date of birth: day, month and a four-digit year.";
-    else if(new Date(y0,m0-1,d0)>now)ae="Date of birth is in the future.";
-    else{const a=clubAge(d0,m0,y0,cy);if(a<0)ae="Date of birth is after the start of the club year (1 April "+cy+"), so there is no club age yet.";else if(a>120)ae="Check the year of birth: that gives a club age over 120.";else age=a}
+    else if(new Date(y0,m0-1,d0)>(raceDate||now))ae=raceDate?"Date of birth is after the race date.":"Date of birth is in the future.";
+    else{const a=clubAge(d0,m0,y0,cy);if(a<0)ae="Date of birth is after the start of the club year (1 April "+cy+"), so there is no club age yet.";else if(a>120)ae="Check the year of birth: that gives a club age over 120.";else{age=a;dobObj={d:d0,m:m0,y:y0}}}
   }
   if(hs!==""||ms!==""||ss!==""){
     const h=Number(hs||0),m=Number(ms||0),s=Number(ss||0);
@@ -187,7 +272,7 @@ function render(){
     else t=h*3600+m*60+s;
   }
   $("age-e").textContent=ae;$("t-e").textContent=te;
-  $("age-h").textContent="Club age is the age on 1 April "+cy+". Current club year: "+cy+"/"+String((cy+1)%100).padStart(2,"0")+" (1 April "+cy+" to 31 March "+(cy+1)+").";
+  $("age-h").textContent="Club age is the age on 1 April "+cy+" (1 April "+cy+" to 31 March "+(cy+1)+").";
   const ca=$("club-age");ca.hidden=age===null;if(!ca.hidden)ca.textContent="Club age: "+age;
 
   const std=$("std"),bib=$("bib"),dl=$("out");
@@ -203,7 +288,8 @@ function render(){
   const r=t!==null?calc(g,age,dist,t):null;
   const h2=document.createElement("h2");h2.textContent="Award times";
   const sub=document.createElement("p");sub.className="sub";
-  sub.textContent=cat.name+" ("+cat.code+"), "+dist+". Finish in the time shown or faster to earn the award.";
+    const rn=$("rname").value.trim();
+  sub.textContent=cat.name+" ("+cat.code+"), "+dist+(rn?" — "+rn:"")+(raceDate?" — "+raceDate.toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}):"")+". Finish in the time shown or faster to earn the award.";
   const tb=document.createElement("table"),thead=document.createElement("thead"),hr=document.createElement("tr"),body=document.createElement("tbody");
   ["Award","Required time"].forEach(x=>{const th=document.createElement("th");th.scope="col";th.textContent=x;hr.append(th)});
   thead.append(hr);
@@ -218,6 +304,12 @@ function render(){
   tb.append(thead,body);std.append(h2,sub,tb);
   if(!r)return;
   bib.hidden=false;
+  const gform=$("gform");
+  if(r.award){
+    claimFields={dist,rname:rn,raceDate,dob:dobObj,age,finishSec:t,award:r.award,limitSec:r.limit,catCode:cat.code};
+    gform.hidden=false;
+  }else{gform.hidden=true;claimFields=null}
+  clearClaimErrorsIfValid();
   row(dl,"Age category",cat.name+" ("+cat.code+")","cat");
   if(r.award){
     bib.style.setProperty("--tier",TIER[r.idx]);
@@ -229,6 +321,35 @@ function render(){
     const n=document.createElement("p");n.className="note";n.textContent="This time is slower than the 1 Star standard of "+fmt(r.limit)+" for "+cat.name+" over "+dist+".";dl.append(n);
   }
 }
+let claimFields=null;
+function showClaimErrors(errs){
+  $("fname-e").textContent=errs.first||"";
+  $("lname-e").textContent=errs.last||"";
+  $("uemail-e").textContent=errs.email||"";
+}
+function clearClaimErrorsIfValid(){
+  const errs=validateClaimDetails($("fname").value,$("lname").value,$("uemail").value);
+  if(!errs.first)$("fname-e").textContent="";
+  if(!errs.last)$("lname-e").textContent="";
+  if(!errs.email)$("uemail-e").textContent="";
+}
+$("gform-btn").addEventListener("click",e=>{
+  e.preventDefault();
+  if(!claimFields)return;
+  const first=$("fname").value,last=$("lname").value,email=$("uemail").value;
+  const errs=validateClaimDetails(first,last,email);
+  showClaimErrors(errs);
+  const bad=errs.first?"fname":errs.last?"lname":errs.email?"uemail":null;
+  if(bad){$(bad).focus();return}
+  const url=buildFormUrl({...claimFields,first:first.trim(),last:last.trim(),email:email.trim()});
+  window.open(url,"_blank","noopener");
+});
+["fname","lname","uemail"].forEach(id=>$(id).addEventListener("input",()=>{
+  const errs=validateClaimDetails($("fname").value,$("lname").value,$("uemail").value);
+  if(id==="fname"&&!errs.first)$("fname-e").textContent="";
+  if(id==="lname"&&!errs.last)$("lname-e").textContent="";
+  if(id==="uemail"&&!errs.email)$("uemail-e").textContent="";
+}));
 document.getElementById("f").addEventListener("input",render);
 document.getElementById("f").addEventListener("change",render);
 render();
